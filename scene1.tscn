@@ -1,0 +1,90 @@
+[gd_scene load_steps=5 format=1]
+
+[ext_resource path="res://player.tscn" type="PackedScene" id=1]
+[ext_resource path="res://ball3.png" type="Texture" id=2]
+[ext_resource path="res://ball2.png" type="Texture" id=3]
+
+[sub_resource type="GDScript" id=1]
+
+script/source = "extends Node2D
+
+
+onready var label = get_node(\"Label\")
+onready var ball1 = get_node(\"ball1\")
+onready var ball2 = get_node(\"ball2\")
+var balls = []
+var scores = []
+
+
+func _ready():
+	var count = 1
+	while true:
+		print('ahoj')
+		var ball = get_node(\"ball\" + str(count))
+		
+		if ball == null:
+			break
+		
+		balls.append(ball)
+		scores.append(0)
+		
+		count += 1
+	
+	set_process(true)
+
+func _process(delta):
+	
+	var text = \"\"
+	
+	var count = 1
+	while count <= balls.size():
+		var ball = balls[count - 1]
+		var speed = ball.speed.length()
+		
+		scores[count - 1] += speed * delta
+		
+		text += \"P%d | score: %d | speed: %d\\n\" % [count, scores[count - 1], speed]
+		
+		count += 1
+	
+	label.set_text(text)
+"
+
+[node name="Node2D" type="Node2D"]
+
+script/script = SubResource( 1 )
+
+[node name="ball1" parent="." instance=ExtResource( 1 )]
+
+transform/pos = Vector2( 360, 450 )
+impact_energy_loss_factor = 0.8
+
+[node name="ball2" parent="." instance=ExtResource( 1 )]
+
+transform/pos = Vector2( 1080, 450 )
+texture = ExtResource( 2 )
+impact_energy_loss_factor = 0.8
+player = 2
+
+[node name="ball3" parent="." instance=ExtResource( 1 )]
+
+transform/pos = Vector2( 720, 450 )
+texture = ExtResource( 3 )
+impact_energy_loss_factor = 0.8
+player = 3
+
+[node name="Label" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 32.0
+margin/top = 32.0
+margin/right = 288.0
+margin/bottom = 288.0
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+
+
