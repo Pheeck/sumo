@@ -1,11 +1,10 @@
-[gd_scene load_steps=12 format=1]
+[gd_scene load_steps=11 format=1]
 
 [ext_resource path="res://background2.png" type="Texture" id=1]
 [ext_resource path="res://aPlayer.tscn" type="PackedScene" id=2]
-[ext_resource path="res://player1.png" type="Texture" id=3]
-[ext_resource path="res://player2.png" type="Texture" id=4]
-[ext_resource path="res://player3.png" type="Texture" id=5]
-[ext_resource path="res://white.png" type="Texture" id=6]
+[ext_resource path="res://player2.png" type="Texture" id=3]
+[ext_resource path="res://player3.png" type="Texture" id=4]
+[ext_resource path="res://white.png" type="Texture" id=5]
 
 [sub_resource type="GDScript" id=1]
 
@@ -15,6 +14,12 @@ script/source = "extends Node2D
 var balls = []
 var scores = []
 var speeds = []
+
+export var default_abberation = 0.005
+export var distorted_abberation = 0.025
+
+onready var shader = get_node(\"shader\").get_material()
+onready var timer = get_node(\"Timer\")
 
 
 func _ready():
@@ -32,6 +37,17 @@ func _ready():
 		
 		count += 1
 	
+	# Connect balls
+	for ball in balls:
+		ball.connect(\"body_enter\", self, \"_on_collision\")
+	
+	# Connect timer
+	timer.connect(\"timeout\", self, \"_on_timeout\")
+	
+	# Reset abberation
+	reset_abberation()
+	
+	# Start process
 	set_process(true)
 
 func _process(delta):
@@ -45,6 +61,26 @@ func _process(delta):
 		
 		count += 1
 
+func _on_collision(object):
+	distort_abberation()
+
+func _on_timeout():
+	reset_abberation()
+
+func reset_abberation():
+	\"\"\" Set abberation to its default value \"\"\"
+	set_abberation(default_abberation)
+
+func set_abberation(value):
+	\"\"\" Set chromatic abberation magnitude \"\"\"
+	shader.set_shader_param(\"rOffset\", Vector2(value, 0))
+	shader.set_shader_param(\"bOffset\", Vector2(-value, 0))
+
+func distort_abberation():
+	\"\"\" Offsets the abberation by distorted_abberation and sets timer to reset it \"\"\"
+	set_abberation(distorted_abberation)
+	timer.start()
+
 func get_scores():
 	\"\"\" Returns an array of scores \"\"\"
 	return scores
@@ -54,11 +90,15 @@ func get_speeds():
 	return speeds
 "
 
-[sub_resource type="CanvasItemShader" id=4]
+[sub_resource type="CanvasItemShader" id=2]
 
 _code = {
-"fragment": "float white = (sin(TIME) + 1) / 2;
-",
+"fragment": "float f = TIME + UV.x + UV.y;
+
+color c1 = tex(TEXTURE, UV);
+color c2 = color(sin(f), cos(f), -sin(f), sin(f/2));
+
+COLOR = c1 + c2 / 50;",
 "fragment_ofs": 0,
 "light": "",
 "light_ofs": 0,
@@ -66,12 +106,12 @@ _code = {
 "vertex_ofs": 0
 }
 
-[sub_resource type="CanvasItemMaterial" id=5]
+[sub_resource type="CanvasItemMaterial" id=3]
 
-shader/shader = SubResource( 4 )
+shader/shader = SubResource( 2 )
 shader/shading_mode = 0
 
-[sub_resource type="CanvasItemShader" id=2]
+[sub_resource type="CanvasItemShader" id=4]
 
 _code = {
 "fragment": "/* Chromatic abberation shader; Doesn't support transparency */
@@ -91,46 +131,54 @@ COLOR = color(red, green, blue, 1.0);",
 "vertex_ofs": 0
 }
 
-[sub_resource type="CanvasItemMaterial" id=3]
+[sub_resource type="CanvasItemMaterial" id=5]
 
-shader/shader = SubResource( 2 )
+shader/shader = SubResource( 4 )
 shader/shading_mode = 0
-shader_param/rOffset = Vector2( 0.002, 0 )
+shader_param/rOffset = Vector2( 0.005, 0 )
 shader_param/gOffset = Vector2( 0, 0 )
-shader_param/bOffset = Vector2( -0.002, 0 )
+shader_param/bOffset = Vector2( -0.005, 0 )
 
 [node name="canvas" type="Node2D"]
 
 script/script = SubResource( 1 )
+default_abberation = 0.005
+distorted_abberation = 0.025
 
 [node name="background" type="Sprite" parent="."]
 
-material/material = SubResource( 5 )
+material/material = SubResource( 3 )
 transform/pos = Vector2( 720, 450 )
 texture = ExtResource( 1 )
 
 [node name="ball1" parent="." instance=ExtResource( 2 )]
 
 transform/pos = Vector2( 360, 450 )
-texture = ExtResource( 3 )
 
 [node name="ball2" parent="." instance=ExtResource( 2 )]
 
 transform/pos = Vector2( 720, 450 )
 player = 2
-texture = ExtResource( 4 )
+texture = ExtResource( 3 )
 
 [node name="ball3" parent="." instance=ExtResource( 2 )]
 
 transform/pos = Vector2( 1080, 450 )
 player = 3
-texture = ExtResource( 5 )
+texture = ExtResource( 4 )
 
 [node name="shader" type="Sprite" parent="."]
 
-material/material = SubResource( 3 )
+material/material = SubResource( 5 )
 transform/pos = Vector2( 720, 450 )
 transform/scale = Vector2( 27, 18 )
-texture = ExtResource( 6 )
+texture = ExtResource( 5 )
+
+[node name="Timer" type="Timer" parent="."]
+
+process_mode = 1
+wait_time = 0.15
+one_shot = true
+autostart = false
 
 
