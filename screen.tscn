@@ -1,0 +1,56 @@
+[gd_scene load_steps=3 format=1]
+
+[ext_resource path="res://canvas.tscn" type="PackedScene" id=1]
+
+[sub_resource type="GDScript" id=1]
+
+script/source = "extends Label
+
+
+# -- Member variables --
+
+onready var canvas = get_parent().get_node(\"canvas\")
+
+
+func _ready():
+	set_process(true)
+
+func _process(delta):
+	var scores = canvas.get_scores()
+	var speeds = canvas.get_speeds()
+	var text = \"\"
+	
+	var count = 1
+	while count <= scores.size():
+		var score = scores[count - 1]
+		var speed = speeds[count - 1]
+		
+		text += \"P%d | score: %d | speed: %d\\n\" % [count, score, speed]
+		
+		count += 1
+	
+	set_text(text)
+"
+
+[node name="screen" type="Node2D"]
+
+[node name="canvas" parent="." instance=ExtResource( 1 )]
+
+transform/scale = Vector2( 0.445, 0.445 )
+
+[node name="Label" type="Label" parent="."]
+
+focus/ignore_mouse = true
+focus/stop_mouse = true
+size_flags/horizontal = 2
+size_flags/vertical = 0
+margin/left = 16.0
+margin/top = 16.0
+margin/right = 180.0
+margin/bottom = 137.0
+percent_visible = 1.0
+lines_skipped = 0
+max_lines_visible = -1
+script/script = SubResource( 1 )
+
+

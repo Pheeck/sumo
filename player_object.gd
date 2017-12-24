@@ -17,6 +17,8 @@ var players = {
 var speed = Vector2(0, 0)     # How will the object move every tick
 export var acceleration = 10  # How much can player accelerate the object
 
+var roomsize = Vector2(1440, 900)
+
 
 # -- Methods --
 
@@ -43,7 +45,6 @@ func _process(delta):
 	
 	# Wall bounce
 	var pos = self.get_pos()
-	var roomsize = self.get_viewport().get_rect().size
 	
 	if pos.x < 0:
 		self.speed.x = abs(self.speed.x)
