@@ -15,11 +15,22 @@ var balls = []
 var scores = []
 var speeds = []
 
-export var default_abberation = 0.005
-export var distorted_abberation = 0.025
+export var scale_abberation = true
+export var base_abberation = 0.005
+export var default_distorted_abberation = 0.025
 
 onready var shader = get_node(\"shader\").get_material()
 onready var timer = get_node(\"Timer\")
+
+var time = 0.0
+var iteration = 0
+
+export var scale_shaking = true
+var shaking = false
+export var shake_roughness = 1
+export var shake_speed = 64
+export var default_shake_magnitude = 8
+var shake_magnitude = default_shake_magnitude
 
 
 func _ready():
@@ -51,6 +62,7 @@ func _ready():
 	set_process(true)
 
 func _process(delta):
+	# Fetch scores and speeds
 	var count = 1
 	while count <= balls.size():
 		var ball = balls[count - 1]
@@ -60,26 +72,61 @@ func _process(delta):
 		speeds[count - 1] = speed
 		
 		count += 1
+	
+	# Shaking
+	time += delta
+	if time >= (2 * PI):
+		time = 0
+	
+	if shaking:
+		if iteration == shake_roughness:
+			set_pos(Vector2(sin(time * shake_speed) * shake_magnitude, 0))
+	
+	# Iteration counting
+	iteration += 1
+	if iteration > shake_roughness:
+		iteration = 0
 
 func _on_collision(object):
-	distort_abberation()
+	var magnitude = object.get_linear_velocity().length()
+	distort_abberation(magnitude)
+	start_shaking(magnitude)
+	timer.start()
 
 func _on_timeout():
 	reset_abberation()
+	reset_shaking()
 
 func reset_abberation():
 	\"\"\" Set abberation to its default value \"\"\"
-	set_abberation(default_abberation)
+	set_abberation(base_abberation)
 
 func set_abberation(value):
 	\"\"\" Set chromatic abberation magnitude \"\"\"
 	shader.set_shader_param(\"rOffset\", Vector2(value, 0))
 	shader.set_shader_param(\"bOffset\", Vector2(-value, 0))
 
-func distort_abberation():
-	\"\"\" Offsets the abberation by distorted_abberation and sets timer to reset it \"\"\"
-	set_abberation(distorted_abberation)
-	timer.start()
+func distort_abberation(magnitude):
+	\"\"\" Offsets the abberation by default_distorted_abberation and sets timer to reset it \"\"\"
+	if scale_abberation:
+		# Add the collision magnitude to the distortion magnitude
+		magnitude *= 0.0001
+		set_abberation(default_distorted_abberation + magnitude)
+	else:
+		set_abberation(default_distorted_abberation)
+
+func start_shaking(magnitude):
+	\"\"\" Start shaking \"\"\"
+	if scale_shaking:  # If we do not scale shaking, we leave the shake_magnitude as default
+		# Add the collision magnitude to the shaking magnitude
+		magnitude *= 0.05
+		shake_magnitude = default_shake_magnitude + magnitude
+	shaking = true
+
+func reset_shaking():
+	\"\"\" Sets position to (0, 0) and turns off shaking \"\"\"
+	set_pos(Vector2(0, 0))
+	shaking = false
 
 func get_scores():
 	\"\"\" Returns an array of scores \"\"\"
@@ -93,12 +140,15 @@ func get_speeds():
 [sub_resource type="CanvasItemShader" id=2]
 
 _code = {
-"fragment": "float f = TIME + UV.x + UV.y;
+"fragment": "/* Color changing shader */
+uniform float modifier = 0.02;
+
+float f = TIME + UV.x + UV.y;
 
 color c1 = tex(TEXTURE, UV);
 color c2 = color(sin(f), cos(f), -sin(f), sin(f/2));
 
-COLOR = c1 + c2 / 50;",
+COLOR = c1 + c2 * modifier;",
 "fragment_ofs": 0,
 "light": "",
 "light_ofs": 0,
@@ -110,6 +160,7 @@ COLOR = c1 + c2 / 50;",
 
 shader/shader = SubResource( 2 )
 shader/shading_mode = 0
+shader_param/modifier = 0.025
 
 [sub_resource type="CanvasItemShader" id=4]
 
@@ -142,8 +193,13 @@ shader_param/bOffset = Vector2( -0.005, 0 )
 [node name="canvas" type="Node2D"]
 
 script/script = SubResource( 1 )
-default_abberation = 0.005
-distorted_abberation = 0.025
+scale_abberation = true
+base_abberation = 0.005
+default_distorted_abberation = 0.025
+scale_shaking = true
+shake_roughness = 1
+shake_speed = 64
+default_shake_magnitude = 8
 
 [node name="background" type="Sprite" parent="."]
 
