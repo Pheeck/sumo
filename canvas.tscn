@@ -11,26 +11,32 @@
 script/source = "extends Node2D
 
 
+onready var shader = get_node(\"shader\").get_material()
+onready var timer = get_node(\"Timer\")
+
+# Score monitoring
 var balls = []
 var scores = []
 var speeds = []
 
-export var scale_abberation = true
+# Abberation
 export var base_abberation = 0.005
 export var default_distorted_abberation = 0.025
+export var scale_abberation = true
+export var abberation_multiplier = 0.0001
 
-onready var shader = get_node(\"shader\").get_material()
-onready var timer = get_node(\"Timer\")
-
+# Shaking
 var time = 0.0
 var iteration = 0
 
-export var scale_shaking = true
-var shaking = false
 export var shake_roughness = 1
 export var shake_speed = 64
 export var default_shake_magnitude = 8
+export var scale_shaking = true
+export var shake_multiplier = 0.1
+
 var shake_magnitude = default_shake_magnitude
+var shaking = false
 
 
 func _ready():
@@ -110,7 +116,7 @@ func distort_abberation(magnitude):
 	\"\"\" Offsets the abberation by default_distorted_abberation and sets timer to reset it \"\"\"
 	if scale_abberation:
 		# Add the collision magnitude to the distortion magnitude
-		magnitude *= 0.0001
+		magnitude *= abberation_multiplier
 		set_abberation(default_distorted_abberation + magnitude)
 	else:
 		set_abberation(default_distorted_abberation)
@@ -119,7 +125,7 @@ func start_shaking(magnitude):
 	\"\"\" Start shaking \"\"\"
 	if scale_shaking:  # If we do not scale shaking, we leave the shake_magnitude as default
 		# Add the collision magnitude to the shaking magnitude
-		magnitude *= 0.05
+		magnitude *= shake_multiplier
 		shake_magnitude = default_shake_magnitude + magnitude
 	shaking = true
 
@@ -193,13 +199,15 @@ shader_param/bOffset = Vector2( -0.005, 0 )
 [node name="canvas" type="Node2D"]
 
 script/script = SubResource( 1 )
-scale_abberation = true
 base_abberation = 0.005
-default_distorted_abberation = 0.025
-scale_shaking = true
+default_distorted_abberation = 0.015
+scale_abberation = true
+abberation_multiplier = 0.0001
 shake_roughness = 1
 shake_speed = 64
-default_shake_magnitude = 8
+default_shake_magnitude = 4
+scale_shaking = true
+shake_multiplier = 0.1
 
 [node name="background" type="Sprite" parent="."]
 
@@ -226,7 +234,7 @@ texture = ExtResource( 4 )
 [node name="shader" type="Sprite" parent="."]
 
 material/material = SubResource( 5 )
-transform/pos = Vector2( 720, 450 )
+transform/pos = Vector2( 719, 449 )
 transform/scale = Vector2( 27, 18 )
 texture = ExtResource( 5 )
 
