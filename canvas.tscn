@@ -21,6 +21,7 @@ var speeds = []
 
 # Abberation
 export var base_abberation = 0.005
+export var distort_abberation_on = true
 export var default_distorted_abberation = 0.025
 export var scale_abberation = true
 export var abberation_multiplier = 0.0001
@@ -29,6 +30,7 @@ export var abberation_multiplier = 0.0001
 var time = 0.0
 var iteration = 0
 
+export var shake_on = true
 export var shake_roughness = 1
 export var shake_speed = 64
 export var default_shake_magnitude = 8
@@ -38,31 +40,31 @@ export var shake_multiplier = 0.1
 var shake_magnitude = default_shake_magnitude
 var shaking = false
 
+# Sparks
+export var sparks_on = true
+export var default_spark_amount = 16
+export var default_spark_speed = 160
+export var scale_sparks = true
+export var spark_amount_multiplier = 0.1
+export var spark_speed_multiplier = 1
 
 func _ready():
-	# Init balls, scores and speeds arrays
-	var count = 1
-	while true:
-		var ball = get_node(\"ball\" + str(count))
-		
-		if ball == null:
-			break
-		
-		balls.append(ball)
-		scores.append(0)
-		speeds.append(0)
-		
-		count += 1
-	
-	# Connect balls
-	for ball in balls:
-		ball.connect(\"body_enter\", self, \"_on_collision\")
-	
 	# Connect timer
 	timer.connect(\"timeout\", self, \"_on_timeout\")
 	
 	# Reset abberation
 	reset_abberation()
+	
+	# Pass spark settings to balls
+	for ball in balls:
+		ball.config_sparks(
+			sparks_on,
+			default_spark_amount,
+			default_spark_speed,
+			scale_sparks,
+			spark_amount_multiplier,
+			spark_speed_multiplier
+		)
 	
 	# Start process
 	set_process(true)
@@ -93,15 +95,23 @@ func _process(delta):
 	if iteration > shake_roughness:
 		iteration = 0
 
-func _on_collision(object):
-	var magnitude = object.get_linear_velocity().length()
-	distort_abberation(magnitude)
-	start_shaking(magnitude)
-	timer.start()
-
 func _on_timeout():
 	reset_abberation()
 	reset_shaking()
+
+func handle_collision(magnitude):
+	\"\"\" Starts on-collision visual effects (Called by balls when they detect a collision) \"\"\"
+	if distort_abberation_on:
+		distort_abberation(magnitude)
+	if shake_on:
+		start_shaking(magnitude)
+	timer.start()
+
+func add_ball(ball):
+	\"\"\" Add a ball to score tracking arrays (Called by balls) \"\"\"
+	balls.append(ball)
+	scores.append(0)
+	speeds.append(0)
 
 func reset_abberation():
 	\"\"\" Set abberation to its default value \"\"\"
@@ -200,14 +210,22 @@ shader_param/bOffset = Vector2( -0.005, 0 )
 
 script/script = SubResource( 1 )
 base_abberation = 0.005
+distort_abberation_on = true
 default_distorted_abberation = 0.015
 scale_abberation = true
 abberation_multiplier = 0.0001
+shake_on = true
 shake_roughness = 1
 shake_speed = 64
 default_shake_magnitude = 4
 scale_shaking = true
 shake_multiplier = 0.1
+sparks_on = true
+default_spark_amount = 16
+default_spark_speed = 160
+scale_sparks = true
+spark_amount_multiplier = 0.1
+spark_speed_multiplier = 1
 
 [node name="background" type="Sprite" parent="."]
 
@@ -234,7 +252,7 @@ texture = ExtResource( 4 )
 [node name="shader" type="Sprite" parent="."]
 
 material/material = SubResource( 5 )
-transform/pos = Vector2( 719, 449 )
+transform/pos = Vector2( 721.79, 449 )
 transform/scale = Vector2( 27, 18 )
 texture = ExtResource( 5 )
 

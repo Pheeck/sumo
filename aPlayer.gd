@@ -7,12 +7,24 @@ export var player = 1
 var players = {
 	1 : "p1",
 	2 : "p2",
-	3 : "p3"
+	3 : "p3",
+	4 : "p4",
+	5 : "p5"
 }
 
 export var roomsize = Vector2(1440, 900)
 export var acceleration = 50
 export(Texture) var texture
+
+onready var canvas = get_parent()
+onready var particles = get_node("Particles2D")
+
+var sparks_on = true
+var default_spark_amount = 16
+var default_spark_speed = 160
+var scale_sparks = true
+var spark_amount_multiplier = 0.1
+var spark_speed_multiplier = 1
 
 
 # -- Methods --
@@ -23,6 +35,13 @@ func _ready():
 		print("Error: A player hasn't been given a texture")
 	get_node("Sprite").set_texture(texture)
 	
+	# Add itself to the score tracking system of canvas
+	canvas.add_ball(self)
+	
+	# Connect collisions
+	connect("body_enter", self, "_on_body_enter")
+	
+	# Start process
 	set_fixed_process(true)
 	
 func _fixed_process(delta):
@@ -50,3 +69,38 @@ func _fixed_process(delta):
 		set_linear_velocity(Vector2(velocity.x, abs(velocity.y)))
 	elif pos.y > roomsize.y:
 		set_linear_velocity(Vector2(velocity.x, -abs(velocity.y)))
+
+func _on_body_enter(object):
+	# Compute properties of the collision
+	var coll_magnitude = get_linear_velocity().length()
+	var coll_direction = object.get_pos() - get_pos()
+	
+	# Start emmiting sparks
+	if sparks_on:
+		# Set direction
+		particles.set_emissor_offset(coll_direction / 4)
+		var direction = coll_direction.angle() - PI / 2
+		particles.set_param(particles.PARAM_DIRECTION, rad2deg(direction))
+		
+		# Set amount and speed
+		var amount = default_spark_amount
+		var speed = default_spark_speed
+		if scale_sparks:
+			amount += coll_magnitude * spark_amount_multiplier
+			speed += coll_magnitude * spark_speed_multiplier
+		particles.set_amount(amount)
+		particles.set_param(particles.PARAM_LINEAR_VELOCITY, speed)
+		
+		# Start
+		particles.set_emitting(true)
+	
+	# Start visual canvas visual effects
+	canvas.handle_collision(coll_magnitude)
+
+func config_sparks(on, default_amount, default_speed, scale, amount_multiplier, speed_multiplier):
+	sparks_on = on
+	default_spark_amount = default_amount
+	default_spark_speed = default_speed
+	scale_sparks = scale
+	spark_amount_multiplier = amount_multiplier
+	spark_speed_multiplier = speed_multiplier

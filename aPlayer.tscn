@@ -52,27 +52,30 @@ texture = ExtResource( 2 )
 
 [node name="Particles2D" type="Particles2D" parent="."]
 
-config/amount = 32
-config/lifetime = 2.0
+config/amount = 64
+config/lifetime = 0.1
+config/emit_timeout = 0.1
+config/emitting = false
 config/process_mode = 1
 config/local_space = false
-config/explosiveness = 0.0
 config/texture = ExtResource( 3 )
 params/direction = 0.0
-params/spread = 180.0
-params/linear_velocity = 20.0
+params/spread = 20.0
+params/linear_velocity = 200.0
 params/spin_velocity = 0.0
 params/orbit_velocity = 0.0
 params/gravity_direction = 0.0
 params/gravity_strength = 0.0
 params/radial_accel = 0.0
 params/tangential_accel = 0.0
-params/damping = 8.0
+params/damping = 500.0
 params/initial_angle = 0.0
 params/initial_size = 0.2
-params/final_size = 0.1
+params/final_size = 0.0
 params/hue_variation = 0.0
 params/anim_speed_scale = 1.0
 params/anim_initial_pos = 0.0
+randomness/linear_velocity = 1.0
+randomness/damping = 1.0
 
 
