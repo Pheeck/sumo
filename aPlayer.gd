@@ -18,6 +18,7 @@ export(Texture) var texture
 
 onready var canvas = get_parent()
 onready var particles = get_node("Particles2D")
+onready var sound = get_node("SamplePlayer")
 
 var sparks_on = true
 var default_spark_amount = 16
@@ -75,7 +76,7 @@ func _on_body_enter(object):
 	var coll_magnitude = get_linear_velocity().length()
 	var coll_direction = object.get_pos() - get_pos()
 	
-	# Start emmiting sparks
+	# Emmit sparks
 	if sparks_on:
 		# Set direction
 		particles.set_emissor_offset(coll_direction / 4)
@@ -93,6 +94,9 @@ func _on_body_enter(object):
 		
 		# Start
 		particles.set_emitting(true)
+	
+	# Play soundeffect
+	sound.play("el2")
 	
 	# Start visual canvas visual effects
 	canvas.handle_collision(coll_magnitude)
