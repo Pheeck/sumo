@@ -20,12 +20,16 @@ onready var canvas = get_parent()
 onready var particles = get_node("Particles2D")
 onready var sound = get_node("SamplePlayer")
 
+# Sparks
 var sparks_on = true
 var default_spark_amount = 16
 var default_spark_speed = 160
 var scale_sparks = true
 var spark_amount_multiplier = 0.1
 var spark_speed_multiplier = 1
+
+# Sound effects
+onready var effect_count = sound.get_sample_library().get_sample_list().size()
 
 
 # -- Methods --
@@ -96,7 +100,8 @@ func _on_body_enter(object):
 		particles.set_emitting(true)
 	
 	# Play soundeffect
-	sound.play("el2")
+	var effect = str((randi() % effect_count) + 1)
+	sound.play(effect)
 	
 	# Start visual canvas visual effects
 	canvas.handle_collision(coll_magnitude)

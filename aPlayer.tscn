@@ -1,10 +1,13 @@
-[gd_scene load_steps=8 format=1]
+[gd_scene load_steps=11 format=1]
 
 [ext_resource path="res://aPlayer.gd" type="Script" id=1]
 [ext_resource path="res://player1.png" type="Texture" id=2]
 [ext_resource path="res://spark.png" type="Texture" id=3]
-[ext_resource path="res://el1.wav" type="Sample" id=4]
-[ext_resource path="res://el2.wav" type="Sample" id=5]
+[ext_resource path="res://1.wav" type="Sample" id=4]
+[ext_resource path="res://2.wav" type="Sample" id=5]
+[ext_resource path="res://3.wav" type="Sample" id=6]
+[ext_resource path="res://4.wav" type="Sample" id=7]
+[ext_resource path="res://5.wav" type="Sample" id=8]
 
 [sub_resource type="CircleShape2D" id=1]
 
@@ -13,17 +16,35 @@ radius = 10.0
 
 [sub_resource type="SampleLibrary" id=2]
 
-samples/el1 = {
+samples/1 = {
 "db": 0.0,
 "pitch": 1.0,
 "priority": 0,
 "sample": ExtResource( 4 )
 }
-samples/el2 = {
+samples/2 = {
 "db": 0.0,
 "pitch": 1.0,
 "priority": 0,
 "sample": ExtResource( 5 )
+}
+samples/3 = {
+"db": 0.0,
+"pitch": 1.0,
+"priority": 0,
+"sample": ExtResource( 6 )
+}
+samples/4 = {
+"db": 0.0,
+"pitch": 1.0,
+"priority": 0,
+"sample": ExtResource( 7 )
+}
+samples/5 = {
+"db": 0.0,
+"pitch": 1.0,
+"priority": 0,
+"sample": ExtResource( 8 )
 }
 
 [node name="ball" type="RigidBody2D"]

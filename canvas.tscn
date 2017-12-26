@@ -165,7 +165,8 @@ float f = TIME + UV.x*UV.x + UV.y*UV.y;
 
 color c1 = tex(TEXTURE, UV);
 
-float intensity = (sin(20.0 * bpm / 60.0 * TIME / 3.1415) + 1.0) / 2.0;
+// sin(bpm x / 3 pi) has the right frequency
+float intensity = (sin(bpm / 3.0 * TIME / 3.1415) + 1.0) / 2.0;
 color c2 = color(sin(f) * intensity, cos(f) * intensity, -sin(f) * intensity, 1.0);
 
 COLOR = c1 + c2 * modifier;",
