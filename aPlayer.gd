@@ -71,17 +71,16 @@ func _fixed_process(delta):
 		apply_impulse(Vector2(0, 0), Vector2(acceleration, 0))
 	
 	# Wall bounce
-	var pos = self.get_pos()
-	var velocity = get_linear_velocity()
-	
-	if pos.x < 0:
-		set_linear_velocity(Vector2(abs(velocity.x), velocity.y))
-	elif pos.x > roomsize.x:
-		set_linear_velocity(Vector2(-abs(velocity.x), velocity.y))
-	if pos.y < 0:
-		set_linear_velocity(Vector2(velocity.x, abs(velocity.y)))
-	elif pos.y > roomsize.y:
-		set_linear_velocity(Vector2(velocity.x, -abs(velocity.y)))
+	# var pos = self.get_pos()
+	# var velocity = get_linear_velocity()
+	# if pos.x < 0:
+	# 	set_linear_velocity(Vector2(abs(velocity.x), velocity.y))
+	# elif pos.x > roomsize.x:
+	# 	set_linear_velocity(Vector2(-abs(velocity.x), velocity.y))
+	# if pos.y < 0:
+	# 	set_linear_velocity(Vector2(velocity.x, abs(velocity.y)))
+	# elif pos.y > roomsize.y:
+	# 	set_linear_velocity(Vector2(velocity.x, -abs(velocity.y)))
 
 func _on_body_enter(object):
 	# Compute properties of the collision
@@ -121,3 +120,12 @@ func config_sparks(on, default_amount, default_speed, scale, amount_multiplier, 
 	scale_sparks = scale
 	spark_amount_multiplier = amount_multiplier
 	spark_speed_multiplier = speed_multiplier
+
+func kill():
+	""" Destroy this object """
+	canvas.balls.erase(self)
+	canvas.scores.erase(self)
+	canvas.speeds.erase(self)
+	
+	queue_free()
+
