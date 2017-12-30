@@ -13,12 +13,15 @@ var players = {
 }
 
 export var roomsize = Vector2(1440, 900)
-export var acceleration = 50
 export(Texture) var texture
 
 onready var canvas = get_parent()
 onready var particles = get_node("Particles2D")
 onready var sound = get_node("SamplePlayer")
+
+# Movement
+export var default_acceleration = 10
+export var damp_acceleration = false
 
 # Sparks
 var sparks_on = true
@@ -50,7 +53,12 @@ func _ready():
 	set_fixed_process(true)
 	
 func _fixed_process(delta):
-	var acceleration = self.acceleration * delta
+	var acceleration = default_acceleration * delta
+	var speed = get_linear_velocity().length()
+	
+	if damp_acceleration:
+		# Damp the acceleration in relation to ball speed
+		acceleration /= log(speed + 8) * 1.1076
 	
 	# Handle input
 	if Input.is_action_pressed(self.players[self.player] + "_up"):
